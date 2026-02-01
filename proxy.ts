@@ -1,36 +1,31 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
-import { NextResponse } from 'next/server';
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 
 const isPublicRoute = createRouteMatcher([
   "/",
   "/sign-up(.*)",
   "/subscribe(.*)",
-])
+]);
 
-const isSignUpRoute = createRouteMatcher([
-  "/sign-up(.*)",
-])
-export default clerkMiddleware(async (auth, req)=> {
-  const userAuth = await auth();
-  const { userId } = userAuth;
-  const {pathname, origin} = req.nextUrl;
+export default clerkMiddleware(async (auth, req) => {
+  const { userId } = await auth();
+  const { pathname } = req.nextUrl;
 
-  if(!isPublicRoute(req) && !userId) {
-    return NextResponse.redirect(new URL("/sign-up", origin));
+  // ✅ Allow API routes without redirect
+  if (pathname.startsWith("/api")) {
+    return NextResponse.next();
   }
 
-  if(isSignUpRoute(req) && userId) {
-    return NextResponse.redirect(new URL("/mealplan", origin));
+  // Protect non-public routes
+  if (!isPublicRoute(req) && !userId) {
+    return NextResponse.redirect(new URL("/sign-up", req.url));
   }
 
-  return NextResponse.next()
+  return NextResponse.next();
 });
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Always run for API routes
-    '/(api|trpc)(.*)',
+    "/((?!_next|.*\\..*).*)",
   ],
 };

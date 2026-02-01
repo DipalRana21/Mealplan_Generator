@@ -4,7 +4,7 @@ export default function SignUpPage()
 {
    return (
        <div>
-         <SignUp signInFallbackRedirectUrl="/subscribe"/>
+         <SignUp signInFallbackRedirectUrl="/create-profile"/>
       </div>
 
    )
