@@ -12,20 +12,22 @@ export async function GET() {
 
         const profile = await prisma.profile.findUnique({
             where: {userId: clerkUser.id},
-            select: {subscriptionTier: true}
+            // FIX: Select both fields needed by the frontend
+            select: {
+                subscriptionTier: true,
+                subscriptionActive: true 
+            }
         });
 
         if(!profile) {
-            return NextResponse.json({
-        error: "Profile not found"});
+            return NextResponse.json({ error: "Profile not found"});
         }
 
         return NextResponse.json({ subscription: profile});
 
-
     } catch (error: any) {
         return NextResponse.json({
-        error: "Internal Server Error"}, 
-        { status: 500 });
+            error: "Internal Server Error"
+        }, { status: 500 });
     }
 }

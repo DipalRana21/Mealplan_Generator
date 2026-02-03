@@ -48,7 +48,7 @@ export default function MealPlanDashboard() {
   const [snacks, setSnacks] = useState(false);
 
 
-   const {mutate, isPending, data, isSuccess } = useMutation<
+   const {mutate, isPending, data, isSuccess, isError, error } = useMutation<
    MealPlanResponse, 
    Error, 
    MealPlanInput
@@ -221,7 +221,7 @@ export default function MealPlanDashboard() {
           </h2>
 
           {isSuccess && data.mealPlan ? (
-            <div className="h-[600px] overflow-y-auto">
+            <div className="h-150 overflow-y-auto">
               <div className="space-y-6">
                 {daysOfWeek.map((day) => {
                   const mealPlan = getMealPlanForDay(day);
