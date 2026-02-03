@@ -4,7 +4,8 @@ export default function SignUpPage()
 {
    return (
        <div>
-         <SignUp signInFallbackRedirectUrl="/create-profile"/>
+         {/* <SignUp signInFallbackRedirectUrl="/create-profile"/> */}
+         <SignUp forceRedirectUrl="/create-profile" />
       </div>
 
    )

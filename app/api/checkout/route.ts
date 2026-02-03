@@ -43,7 +43,8 @@ export async function POST(request: NextRequest) {
         customer_email: email,
         mode: "subscription",
         metadata: { clerkUserId: userId, planType },
-        success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/?session_id={CHECKOUT_SESSION_ID}`,
+        // success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/?session_id={CHECKOUT_SESSION_ID}`,
+        success_url: `${process.env.NEXT_PUBLIC_BASE_URL}`,
         cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/subscribe`,
 
     });

@@ -1,63 +1,3 @@
-// "use client"
-// import { useUser } from "@clerk/nextjs";
-// import { useMutation } from "@tanstack/react-query"
-// import { useEffect } from "react";
-// import { useRouter } from "next/navigation";
-
-// type ApiResponse = {
-//     message: string;
-//     error?: string;
-// };
-
-// async function createProfileRequest() {
-//     const response = await fetch('/api/create-profile', {
-//         method: "POST",
-//         headers: {
-//             "Content-Type": "application/json",
-//         }
-//     })
-
-//     // const data = await response.json()
-//     const res = await fetch("/api/create-profile", {
-//   method: "POST",
-// });
-
-// if (!res.ok) {
-//   const text = await res.text();
-//   console.error("API error:", text);
-//   throw new Error("Request failed");
-// }
-
-// return res.json();
-
-//     // return data as ApiResponse
-// }
-
-// export default function CreateProfile() {
-
-//     const { isLoaded, isSignedIn } = useUser()
-//     const router = useRouter();
-
-//     const { mutate, isPending } = useMutation<ApiResponse, Error>({
-//         mutationFn: createProfileRequest,
-//         onSuccess: (data) => {
-//             router.push("/subscribe");
-//         },
-//         onError: (err) => {
-//             console.log(err);
-//         }
-//     });
-
-//     useEffect(() => {
-//         if (isLoaded && isSignedIn && !isPending) {
-//             mutate()
-//         }
-//     }, [isLoaded, isSignedIn])
-
-//     return <div>Processing sign in...</div>
-    
-// }
-
 "use client";
 import { useUser } from "@clerk/nextjs";
 import { useMutation } from "@tanstack/react-query";
@@ -70,27 +10,21 @@ type ApiResponse = {
 };
 
 async function createProfileRequest() {
-  // Only fetch ONCE
   const response = await fetch("/api/create-profile", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
   });
 
-  // Handle non-200 responses safely
   if (!response.ok) {
-    // Attempt to parse JSON error, fallback to text if it's HTML (the 500/404 error page)
     const errorText = await response.text();
-    let errorJson;
+    // Try to parse as JSON, fallback to text
     try {
-        errorJson = JSON.parse(errorText);
-    } catch (e) {
-        throw new Error(`API Error (Status ${response.status}): ${errorText}`);
+      const errorJson = JSON.parse(errorText);
+      throw new Error(errorJson.error || "Request failed");
+    } catch {
+      throw new Error(`API Error ${response.status}: ${errorText}`);
     }
-    throw new Error(errorJson.error || "Request failed");
   }
-
   return response.json();
 }
 
@@ -100,24 +34,30 @@ export default function CreateProfile() {
 
   const { mutate, isPending } = useMutation<ApiResponse, Error>({
     mutationFn: createProfileRequest,
-    onSuccess: (data) => {
-      console.log("Profile created:", data);
-      router.push("/subscribe");
+    onSuccess: () => {
+      // User is synced, send them to the real app
+      router.push("/subscribe"); // or /dashboard
     },
     onError: (err) => {
       console.error("Mutation Error:", err);
+      // Optional: Add a UI alert here so you know if it fails
     },
   });
 
   useEffect(() => {
-    if (isLoaded && isSignedIn && !isPending) {
+    // FIX: Used && instead of comma
+    if (isLoaded && isSignedIn) {
       mutate();
     }
-  }, [isLoaded, isSignedIn]); // Removed isPending to prevent loops, though logic was okay
+  }, [isLoaded, isSignedIn]); 
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <p>Setting up your account...</p>
+    <div className="flex h-screen w-full items-center justify-center">
+      <div className="flex flex-col items-center gap-2">
+        {/* Simple loader to show something is happening */}
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
+        <p className="text-gray-500">Setting up your account...</p>
+      </div>
     </div>
   );
 }
